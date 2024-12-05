@@ -10,8 +10,6 @@ phases:
       - REACT_APP_API_URL=http://localhost:3001 SKIP_PREFLIGHT_CHECK=true npm run build --prefix client
       - echo Rodando testes unitários
       - npm test
-      - echo Criando Banco de Dados
-      - npx sequelize db:create
       - echo Executando migrates
       - npx sequelize db:migrate
       - codebuild-breakpoint
