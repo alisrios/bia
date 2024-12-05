@@ -11,5 +11,4 @@ phases:
       - echo Rodando testes unitários
       - npm test
       - echo Executando migrates
-      - npx sequelize db:migrate
-      - codebuild-breakpoint
+      - npx sequelize db:migrate      
