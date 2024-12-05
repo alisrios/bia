@@ -22,5 +22,8 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Gerando artefato da imagem para o ECS
       - printf '[{"name":"bia","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo Executando migrates do Banco de Dados
+      - npm install && npx sequelize db:migrate     
+      - codebuild-breakpoint
 artifacts:
   files: imagedefinitions.json

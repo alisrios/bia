@@ -12,8 +12,8 @@ services:
       DB_HOST: database
       DB_PORT: 5432
       ## NAO PRECISA NO BOOTCAMP DAQUI PRA BAIXO ##
-      # DB_SECRET_NAME: 
-      # DB_REGION: 
+      #DB_SECRET_NAME: rds!db-c4ac3d90-cace-46e2-a8a8-80f116606783
+      #DB_REGION: us-east-1
       # AWS_ACCESS_KEY_ID: 
       # AWS_SECRET_ACCESS_KEY:
       # DEBUG_SECRET: 
