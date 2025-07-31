@@ -153,13 +153,13 @@ create_task_definition() {
     local ecr_uri=$3
     local tag=$4
     
-    log_info "Criando nova task definition..."
+    log_info "Criando nova task definition..." >&2
     
     # Obter a task definition atual
     local current_task_def=$(aws ecs describe-task-definition --task-definition $task_family --region $region --query 'taskDefinition' --output json)
     
     if [ $? -ne 0 ]; then
-        log_error "Não foi possível obter a task definition atual: $task_family"
+        log_error "Não foi possível obter a task definition atual: $task_family" >&2
         exit 1
     fi
     
@@ -170,25 +170,31 @@ create_task_definition() {
     # Criar nova task definition com a nova imagem
     local new_task_def=$(jq --arg image "$ecr_uri:$tag" '
         .containerDefinitions[0].image = $image |
-        del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .placementConstraints, .compatibilities, .registeredAt, .registeredBy)
+        del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .placementConstraints, .compatibilities, .registeredAt, .registeredBy, .runtimePlatform)
     ' "$temp_file")
     
     # Salvar nova task definition em arquivo temporário
     local new_temp_file=$(mktemp)
     echo "$new_task_def" > "$new_temp_file"
     
-    # Registrar nova task definition
+    # Registrar nova task definition e capturar apenas a revision
     local new_revision=$(aws ecs register-task-definition --region $region --cli-input-json file://"$new_temp_file" --query 'taskDefinition.revision' --output text)
+    local register_exit_code=$?
     
     # Limpar arquivos temporários
     rm -f "$temp_file" "$new_temp_file"
     
-    if [ $? -ne 0 ]; then
-        log_error "Falha ao registrar nova task definition"
+    if [ $register_exit_code -ne 0 ]; then
+        log_error "Falha ao registrar nova task definition" >&2
         exit 1
     fi
     
-    log_success "Nova task definition criada: $task_family:$new_revision"
+    if [ -z "$new_revision" ] || [ "$new_revision" = "null" ] || [ "$new_revision" = "None" ]; then
+        log_error "Não foi possível obter a revision da nova task definition" >&2
+        exit 1
+    fi
+    
+    log_success "Nova task definition criada: $task_family:$new_revision" >&2
     echo $new_revision
 }
 
@@ -266,7 +272,10 @@ deploy() {
     push_image $commit_hash $ecr_uri
     
     # Criar nova task definition
+    log_info "Chamando create_task_definition com parâmetros: $region $task_family $ecr_uri $commit_hash"
     local new_revision=$(create_task_definition $region $task_family $ecr_uri $commit_hash)
+    
+    log_info "Revision retornada: '$new_revision'"
     
     if [ -z "$new_revision" ]; then
         log_error "Falha ao obter revision da nova task definition"
