@@ -44,12 +44,12 @@ fi
 log "Criando Task Definition para rollback..."
 CURRENT_TASK=$(aws ecs describe-task-definition --task-definition $TASK_FAMILY --region $REGION --query 'taskDefinition')
 
-NEW_TASK=$(echo "$CURRENT_TASK" | jq --arg image "$ECR_URI:$TARGET_TAG" '
+echo "$CURRENT_TASK" | jq --arg image "$ECR_URI:$TARGET_TAG" '
   .containerDefinitions[0].image = $image |
   del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .placementConstraints, .compatibilities, .registeredAt, .registeredBy)
-')
+' > rollback-task.json
 
-NEW_REVISION=$(echo "$NEW_TASK" | aws ecs register-task-definition --region $REGION --cli-input-json file:///dev/stdin --query 'taskDefinition.revision' --output text)
+NEW_REVISION=$(aws ecs register-task-definition --region $REGION --cli-input-json file://rollback-task.json --query 'taskDefinition.revision' --output text)
 
 # Update Service
 log "Atualizando serviço..."
@@ -58,6 +58,9 @@ aws ecs update-service --region $REGION --cluster $CLUSTER --service $SERVICE --
 success "Rollback concluído!"
 success "Versão: $TARGET_TAG"
 success "Task Definition: $TASK_FAMILY:$NEW_REVISION"
+
+# Limpeza
+rm -f rollback-task.json
 
 log "Aguardando estabilização..."
 aws ecs wait services-stable --region $REGION --cluster $CLUSTER --services $SERVICE
