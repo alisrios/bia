@@ -8,9 +8,9 @@ set -e
 # Configurações
 REGION="us-east-1"
 ECR_REPO="bia"
-CLUSTER="cluster-bia"
-SERVICE="service-bia"
-TASK_FAMILY="task-def-bia"
+CLUSTER="cluster-bia-alb"
+SERVICE="service-bia-alb"
+TASK_FAMILY="task-def-bia-alb"
 
 # Cores
 GREEN='\033[0;32m'

@@ -8,9 +8,9 @@ set -e
 # Configurações
 REGION="us-east-1"
 ECR_REPO="bia"
-CLUSTER="cluster-bia"
-SERVICE="service-bia"
-TASK_FAMILY="task-def-bia"
+CLUSTER="cluster-bia-alb"
+SERVICE="service-bia-alb"
+TASK_FAMILY="task-def-bia-alb"
 
 # Cores
 GREEN='\033[0;32m'
@@ -144,5 +144,5 @@ echo
 echo "Para ver versões no ECR:"
 echo "  aws ecr describe-images --repository-name $ECR_REPO --region $REGION --query 'imageDetails[*].imageTags[0]' --output table"
 echo
-echo "Para rollback (usando o script existente):"
-echo "  ./deploy-ecs.sh rollback -t <commit-hash>"
+echo "Para rollback:"
+echo "  ./rollback-simple.sh <commit-hash>"

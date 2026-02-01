@@ -16,9 +16,9 @@ fi
 # Configurações
 REGION="us-east-1"
 ECR_REPO="bia"
-CLUSTER="cluster-bia"
-SERVICE="service-bia"
-TASK_FAMILY="task-def-bia"
+CLUSTER="cluster-bia-alb"
+SERVICE="service-bia-alb"
+TASK_FAMILY="task-def-bia-alb"
 TARGET_TAG="$1"
 
 # Cores
